@@ -27,6 +27,7 @@ button.y{background:#F2E21B;color:#1b1b1b;border:0}
 .hide{display:none!important}
 .v{min-width:44px;font-size:14px;text-align:right}
 .lnk{background:none;border:0;color:#a9a69d;font-size:13px;text-decoration:underline;padding:0;align-self:flex-start}
+.box{border:1px solid #333;border-radius:10px;padding:12px}
 </style>
 </head>
 <body>
@@ -49,10 +50,18 @@ button.y{background:#F2E21B;color:#1b1b1b;border:0}
 </div>
 
 <div id="gEq" class="grp hide">
+<div class="box grp">
+<div class="r"><span class="l">Аудіо</span><input type="file" id="au" accept="audio/*,.mp3,.m4a,.wav,.aac"></div>
+<div id="auBox" class="grp hide">
+<div class="r"><span class="l">Початок фрагмента</span><input type="range" id="eqo" min="0" max="0" step="0.5" value="0"><span class="v" id="eqoo">0:00</span></div>
+<div class="ck"><label><input type="checkbox" id="eqau" checked> Додати звук у відео</label></div>
+<div class="row"><button id="aupl">Прослухати фрагмент</button><button id="aurm">Прибрати аудіо</button></div>
+</div>
+</div>
 <div class="r"><span class="l">Стиль</span><select id="eqs"><option value="bars">Смуги еквалайзера</option><option value="wave">Хвиля осцилографа</option><option value="ring">Коло з променями</option></select></div>
 <div class="r"><span class="l">Підпис</span><input type="text" id="eqc" placeholder="Вгадай мелодію"></div>
 <div class="r"><span class="l">Тривалість</span><input type="range" id="eqd" min="3" max="15" step="1" value="10"><span class="v" id="eqdo">10 с</span></div>
-<div class="r"><span class="l">Темп</span><input type="range" id="eqb" min="60" max="180" step="2" value="120"><span class="v" id="eqbo">120</span></div>
+<div class="r" id="rTempo"><span class="l">Темп</span><input type="range" id="eqb" min="60" max="180" step="2" value="120"><span class="v" id="eqbo">120</span></div>
 <div class="r"><span class="l">Сила</span><input type="range" id="eqa" min="40" max="160" step="5" value="100"><span class="v" id="eqao">100%</span></div>
 <div class="r"><span class="l">Кількість смуг</span><input type="range" id="eqn" min="11" max="61" step="2" value="31"><span class="v" id="eqno">31</span></div>
 <div class="ck"><label><input type="checkbox" id="eqcaps"> Підпис великими літерами</label></div>
@@ -65,7 +74,7 @@ button.y{background:#F2E21B;color:#1b1b1b;border:0}
 <div class="row"><button id="rs">З початку</button><button id="rec" class="y">Записати відео</button></div>
 <p id="st">1080×1920, 30 кадрів/с. Під час запису не блокуй екран і не перемикай вкладку.</p>
 <div class="row"><button id="shb" class="y hide">Зберегти у Фото / поділитися</button><button id="dlb" class="hide">Завантажити файл</button></div>
-<video id="v" class="hide" controls playsinline muted style="width:180px;border-radius:8px"></video>
+<video id="v" class="hide" controls playsinline style="width:180px;border-radius:8px"></video>
 <button id="reset" class="lnk">Скинути всі налаштування</button>
 </div>
 
@@ -95,23 +104,45 @@ const f=(rf()-0.5)*0.16*k;x.fillStyle=f>0?`rgba(255,250,235,${f})`:`rgba(0,0,0,$
 
 const eio=p=>p<0.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2,eo=p=>1-Math.pow(1-p,3),cl=p=>Math.max(0,Math.min(1,p));
 const nEl=$('n'),z0=$('z0'),lwEl=$('lw'),topEl=$('top'),mainEl=$('main'),durEl=$('dur'),capsEl=$('caps'),timEl=$('tim'),kEl=$('k'),ff=$('ff');
-const eqs=$('eqs'),eqc=$('eqc'),eqd=$('eqd'),eqb=$('eqb'),eqa=$('eqa'),eqn=$('eqn'),eqcaps=$('eqcaps');
-const SAVE_IDS=['n','z0','lw','top','main','dur','caps','tim','eqs','eqc','eqd','eqb','eqa','eqn','eqcaps','k','ff'];
-const KEY='rebelia_gen_v2';
+const eqs=$('eqs'),eqc=$('eqc'),eqd=$('eqd'),eqb=$('eqb'),eqa=$('eqa'),eqn=$('eqn'),eqcaps=$('eqcaps'),eqo=$('eqo'),eqau=$('eqau'),st=$('st');
+const SAVE_IDS=['n','z0','lw','top','main','dur','caps','tim','eqs','eqc','eqd','eqb','eqa','eqn','eqcaps','eqau','k','ff'];
+const KEY='rebelia_gen_v3';
 function saveSettings(){try{const o={mode};SAVE_IDS.forEach(id=>{const e=$(id);if(id==='ff'&&e.value==='UserFont')return;o[id]=e.type==='checkbox'?e.checked:e.value});localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
-function loadSettings(){try{const o=JSON.parse(localStorage.getItem(KEY)||'null');if(!o)return;SAVE_IDS.forEach(id=>{if(!(id in o))return;const e=$(id);if(e.type==='checkbox')e.checked=o[id];else e.value=o[id]});if(o.ff)FONT=o.ff;if(o.mode)mode=o.mode}catch(e){}}
-$('reset').onclick=()=>{try{localStorage.removeItem(KEY)}catch(e){}location.reload()};
+function loadSettings(){try{const o=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem('rebelia_gen_v2')||'null');if(!o)return;SAVE_IDS.forEach(id=>{if(!(id in o))return;const e=$(id);if(e.type==='checkbox')e.checked=o[id];else e.value=o[id]});if(o.ff)FONT=o.ff;if(o.mode)mode=o.mode}catch(e){}}
+$('reset').onclick=()=>{try{localStorage.removeItem(KEY);localStorage.removeItem('rebelia_gen_v2')}catch(e){}location.reload()};
+const fmt=s=>{s=+s;return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')+(s%1?'.5':'')};
 
 function dur(){return mode==='cd'?(+nEl.value+(z0.checked?1:0)):mode==='tx'?+durEl.value:+eqd.value}
 function upd(){$('no').textContent=nEl.value;$('lwo').textContent=lwEl.value;$('duro').textContent=durEl.value+' с';$('ko').textContent=kEl.value+'%';
-$('eqdo').textContent=eqd.value+' с';$('eqbo').textContent=eqb.value;$('eqao').textContent=eqa.value+'%';$('eqno').textContent=eqn.value}
-SAVE_IDS.filter(id=>id!=='ff').forEach(id=>$(id).addEventListener('input',()=>{upd();saveSettings();if(!['k','lw','eqa','eqn'].includes(id))restart()}));
-function setMode(m){mode=m;[['cd','mCd','gCd'],['tx','mTx','gTx'],['eq','mEq','gEq']].forEach(([k,b,g])=>{$(b).classList.toggle('on',m===k);$(g).classList.toggle('hide',m!==k)});saveSettings();restart()}
+$('eqdo').textContent=eqd.value+' с';$('eqbo').textContent=eqb.value;$('eqao').textContent=eqa.value+'%';$('eqno').textContent=eqn.value;$('eqoo').textContent=fmt(eqo.value)}
+SAVE_IDS.filter(id=>id!=='ff').forEach(id=>$(id).addEventListener('input',()=>{upd();saveSettings();if(!['k','lw','eqa','eqn','eqau'].includes(id))restart()}));
+eqo.addEventListener('input',()=>{upd();stopAudio()});
+function setMode(m){mode=m;stopAudio();[['cd','mCd','gCd'],['tx','mTx','gTx'],['eq','mEq','gEq']].forEach(([k,b,g])=>{$(b).classList.toggle('on',m===k);$(g).classList.toggle('hide',m!==k)});saveSettings();restart()}
 $('mCd').onclick=()=>setMode('cd');$('mTx').onclick=()=>setMode('tx');$('mEq').onclick=()=>setMode('eq');
 $('p1').onclick=()=>{topEl.value='';mainEl.value='Вгадай трек з Ребелії за одним словом';durEl.value=10;timEl.checked=false;upd();saveSettings();restart()};
 $('p2').onclick=()=>{topEl.value='Слово:';mainEl.value='Час';durEl.value=5;timEl.checked=true;upd();saveSettings();restart()};
 ff.onchange=()=>{const f=ff.value;document.fonts.load(`100px "${f}"`).catch(()=>{}).finally(()=>{FONT=f;saveSettings();restart()})};
-$('up').onchange=e=>{const fl=e.target.files[0];if(!fl)return;fl.arrayBuffer().then(b=>new FontFace('UserFont',b).load()).then(fc=>{document.fonts.add(fc);let o=ff.querySelector('option[value="UserFont"]');if(!o){o=document.createElement('option');o.value='UserFont';ff.appendChild(o)}o.textContent=fl.name;ff.value='UserFont';FONT='UserFont';restart()}).catch(()=>{$('st').textContent='Не вдалося відкрити цей файл шрифту. Спробуй .ttf або .otf.'})};
+$('up').onchange=e=>{const fl=e.target.files[0];if(!fl)return;fl.arrayBuffer().then(b=>new FontFace('UserFont',b).load()).then(fc=>{document.fonts.add(fc);let o=ff.querySelector('option[value="UserFont"]');if(!o){o=document.createElement('option');o.value='UserFont';ff.appendChild(o)}o.textContent=fl.name;ff.value='UserFont';FONT='UserFont';restart()}).catch(()=>{st.textContent='Не вдалося відкрити цей файл шрифту. Спробуй .ttf або .otf.'})};
+
+let actx=null,analyser=null,gainN=null,dest=null,freqD=null,timeD=null,abuf=null,src=null,aOn=false;
+function ensureCtx(){if(!actx){const AC=window.AudioContext||window.webkitAudioContext;actx=new AC();analyser=actx.createAnalyser();analyser.fftSize=2048;analyser.smoothingTimeConstant=0.78;
+freqD=new Uint8Array(analyser.frequencyBinCount);timeD=new Uint8Array(analyser.fftSize);gainN=actx.createGain();gainN.connect(analyser);analyser.connect(actx.destination);
+dest=actx.createMediaStreamDestination();gainN.connect(dest)}if(actx.state==='suspended')actx.resume()}
+function stopAudio(){if(src){try{src.onended=null;src.stop()}catch(e){}src=null}aOn=false}
+function playFragment(D){if(!abuf)return;ensureCtx();stopAudio();const s=actx.createBufferSource();s.buffer=abuf;s.connect(gainN);
+const n=actx.currentTime+0.03,off=Math.min(+eqo.value,Math.max(0,abuf.duration-0.5));
+gainN.gain.cancelScheduledValues(0);gainN.gain.setValueAtTime(0,n);gainN.gain.linearRampToValueAtTime(1,n+0.12);gainN.gain.setValueAtTime(1,n+Math.max(0.2,D-0.3));gainN.gain.linearRampToValueAtTime(0,n+D);
+s.start(n,off,D+0.05);s.onended=()=>{if(src===s){src=null;aOn=false}};src=s;aOn=true}
+$('au').onchange=e=>{const fl=e.target.files[0];if(!fl)return;ensureCtx();st.textContent='Відкриваю аудіо…';
+fl.arrayBuffer().then(buf=>{actx.decodeAudioData(buf,b=>{abuf=b;stopAudio();eqo.max=Math.max(0,Math.floor((b.duration-1)*2)/2);eqo.value=0;
+$('auBox').classList.remove('hide');$('rTempo').classList.add('hide');upd();st.textContent='Аудіо завантажено ('+fmt(Math.floor(b.duration))+'). Вибери початок фрагмента і натисни «Прослухати фрагмент».'},
+()=>{st.textContent='Не вдалося відкрити цей аудіофайл. Спробуй mp3 або m4a.'})})};
+$('aurm').onclick=()=>{stopAudio();abuf=null;$('au').value='';$('auBox').classList.add('hide');$('rTempo').classList.remove('hide');st.textContent='Аудіо прибрано, еквалайзер знову рухається у вигаданому ритмі.'};
+$('aupl').onclick=()=>{restart();playFragment(dur())};
+const useA=()=>mode==='eq'&&abuf&&aOn&&analyser;
+function audioBand(u){const bw=actx.sampleRate/analyser.fftSize,f=40*Math.pow(300,u),i=Math.round(f/bw),sp=1+Math.floor(u*8);let s=0,n=0;
+for(let j=Math.max(1,i-sp);j<=Math.min(freqD.length-1,i+sp);j++){s+=freqD[j];n++}const v=n?s/n/255:0;return Math.min(1,Math.pow(v,1.8)*(1+u*1.2)*1.25)}
+function audioKick(){const bw=actx.sampleRate/analyser.fftSize,a=Math.max(1,Math.round(40/bw)),b=Math.max(a+1,Math.round(160/bw));let s=0;for(let j=a;j<=b;j++)s+=freqD[j];return Math.min(1.4,Math.pow(s/(b-a+1)/255,2.2)*1.6)}
 
 function drawCd(t){
 const N=+nEl.value,i=Math.min(N,Math.floor(t)),d=String(N-i),p=Math.min(1,t-i),cx=W/2,cy=H/2-30,Rr=330,lw=+lwEl.value;
@@ -156,8 +187,8 @@ if(gp>0){x.strokeStyle=GOLD;x.lineWidth=6;x.lineCap='round';x.beginPath();x.move
 if(timEl.checked){const ty=H-380,tw=W*0.62,tl=W/2-tw/2,q=cl(t/D);x.lineCap='round';x.strokeStyle='rgba(255,255,255,0.1)';x.lineWidth=10;x.beginPath();x.moveTo(tl,ty);x.lineTo(tl+tw,ty);x.stroke();
 x.strokeStyle=GOLD;x.beginPath();x.moveTo(tl,ty);x.lineTo(tl+tw*q,ty);x.stroke();x.fillStyle=GOLD2;x.beginPath();x.arc(tl+tw*q,ty,13,0,TP);x.fill()}}
 
-function kick(t){const b=t*(+eqb.value)/60,bt=b%1,sn=(Math.floor(b)%2===1)?Math.exp(-((b+0.5)%1)*9)*0.35:0;return Math.exp(-bt*6)+sn}
-function band(u,t){const kk=kick(t),env=0.75+0.25*Math.sin(TP*0.2*t),q=t*12,q0=Math.floor(q)%120,q1=(q0+1)%120,fq=q-Math.floor(q),sm=fq*fq*(3-2*fq);
+function kick(t){if(useA())return audioKick();const b=t*(+eqb.value)/60,bt=b%1,sn=(Math.floor(b)%2===1)?Math.exp(-((b+0.5)%1)*9)*0.35:0;return Math.exp(-bt*6)+sn}
+function band(u,t){if(useA())return audioBand(u);const kk=kick(t),env=0.75+0.25*Math.sin(TP*0.2*t),q=t*12,q0=Math.floor(q)%120,q1=(q0+1)%120,fq=q-Math.floor(q),sm=fq*fq*(3-2*fq);
 const ii=Math.round(u*60),hz=hs(ii,q0)*(1-sm)+hs(ii,q1)*sm;
 const lo=kk*Math.pow(1-u,1.4),mid=(0.5+0.5*Math.sin(TP*0.7*t+u*9))*(0.5+0.5*Math.sin(TP*0.3*t+u*4.3));
 return Math.min(1,env*(0.07+0.58*lo+0.28*mid+0.22*hz*(0.4+0.6*u)))}
@@ -165,21 +196,23 @@ function eqBars(t,amp){const N=+eqn.value,cx=W/2,cy=H/2-40,sp=W*0.82/N,bw=sp*0.5
 for(let i=0;i<N;i++){const u=Math.abs(i-(N-1)/2)/((N-1)/2),h=Math.min(720,band(u,t)*mx*amp)+bw/2,px=cx-W*0.41+sp*(i+0.5);
 x.strokeStyle=u<0.35?YEL:(u<0.7?GOLD2:GOLD);x.lineWidth=bw;x.beginPath();x.moveTo(px,cy-h);x.lineTo(px,cy+h);x.stroke();
 x.fillStyle='rgba(242,226,27,0.12)';x.fillRect(px-bw/2,cy+h+30,bw,Math.max(6,h*0.18))}}
-function eqWave(t,amp){const cy=H/2-40,kk=kick(t),Ls=[[YEL,9,1,0],[GOLD2,5,0.7,1.7],[GOLD,3,0.45,3.1]];
-for(const [col,lw,am,ph] of Ls){x.strokeStyle=col;x.lineWidth=lw;x.lineJoin='round';x.beginPath();
-for(let px=60;px<=W-60;px+=6){const u=(px-60)/(W-120),win=Math.pow(Math.sin(Math.PI*u),1.6);
-const y=Math.sin(TP*(3*u)+TP*0.5*t+ph)*(0.4+0.6*kk)*170+Math.sin(TP*(7*u)-TP*0.9*t+ph)*band(Math.abs(u-0.5)*2,t)*150+Math.sin(TP*(17*u)+TP*1.3*t)*45*(0.3+kk);
-const yy=cy+y*win*am*amp;px===60?x.moveTo(px,yy):x.lineTo(px,yy)}x.stroke()}
+function eqWave(t,amp){const cy=H/2-40,kk=kick(t),Ls=[[YEL,9,1,0],[GOLD2,5,0.7,1.7],[GOLD,3,0.45,3.1]],A=useA();
+Ls.forEach(([col,lw,am,ph],li)=>{x.strokeStyle=col;x.lineWidth=lw;x.lineJoin='round';x.beginPath();
+for(let px=60;px<=W-60;px+=6){const u=(px-60)/(W-120),win=Math.pow(Math.sin(Math.PI*u),1.6);let y;
+if(A){const len=timeD.length,idx=(Math.floor(u*len*0.5)+li*97)%len;y=(timeD[idx]-128)/128*520}
+else y=Math.sin(TP*(3*u)+TP*0.5*t+ph)*(0.4+0.6*kk)*170+Math.sin(TP*(7*u)-TP*0.9*t+ph)*band(Math.abs(u-0.5)*2,t)*150+Math.sin(TP*(17*u)+TP*1.3*t)*45*(0.3+kk);
+const yy=cy+y*win*am*amp;px===60?x.moveTo(px,yy):x.lineTo(px,yy)}x.stroke()});
 x.strokeStyle='rgba(235,235,230,0.18)';x.lineWidth=2;x.beginPath();x.moveTo(60,cy);x.lineTo(W-60,cy);x.stroke()}
-function eqRing(t,amp){const cx=W/2,cy=H/2-40,kk=kick(t),Rr=250+14*kk,N=(+eqn.value)*2+10;x.lineCap='round';
+function eqRing(t,amp){const cx=W/2,cy=H/2-40,kk=Math.min(1.2,kick(t)),Rr=250+14*kk,N=(+eqn.value)*2+10;x.lineCap='round';
 for(let i=0;i<N;i++){const a=-Math.PI/2+TP*i/N,u=Math.abs(((i/N)*2)%2-1),h=16+Math.min(300,band(u,t)*230*amp);
 x.strokeStyle=u>0.65?YEL:(u>0.3?GOLD2:GOLD);x.lineWidth=Math.max(5,Math.min(14,800/N));x.beginPath();x.moveTo(cx+Math.cos(a)*(Rr+18),cy+Math.sin(a)*(Rr+18));x.lineTo(cx+Math.cos(a)*(Rr+18+h),cy+Math.sin(a)*(Rr+18+h));x.stroke()}
 x.strokeStyle=GOLD;x.lineWidth=8;x.beginPath();x.arc(cx,cy,Rr,0,TP);x.stroke();
-x.strokeStyle=`rgba(245,205,98,${0.45*Math.min(1,kk)})`;x.lineWidth=3;x.beginPath();x.arc(cx,cy,Math.max(20,Rr-26-20*(1-kk)),0,TP);x.stroke();
+x.strokeStyle=`rgba(245,205,98,${0.45*Math.min(1,kk)})`;x.lineWidth=3;x.beginPath();x.arc(cx,cy,Math.max(20,Rr-26-20*(1-Math.min(1,kk))),0,TP);x.stroke();
 x.save();x.translate(cx,cy);x.rotate(TP*t/5);x.strokeStyle='rgba(235,235,230,0.12)';x.lineWidth=2;for(let r=60;r<Rr-40;r+=22){x.beginPath();x.arc(0,0,r,0,TP);x.stroke()}
 x.fillStyle=YEL;x.beginPath();x.arc(0,0,46,0,TP);x.fill();x.fillStyle='#2c2c2b';x.beginPath();x.arc(0,0,9,0,TP);x.fill();
 x.fillStyle=GOLD2;x.beginPath();x.arc(30,0,5,0,TP);x.fill();x.restore()}
-function drawEq(t){const amp=(+eqa.value)/100,s=eqs.value;
+function drawEq(t){if(useA()){analyser.getByteFrequencyData(freqD);analyser.getByteTimeDomainData(timeD)}
+const amp=(+eqa.value)/100,s=eqs.value;
 if(s==='bars')eqBars(t,amp);else if(s==='wave')eqWave(t,amp);else eqRing(t,amp);
 let tt=eqc.value.trim();if(eqcaps.checked)tt=tt.toUpperCase();
 if(tt){x.save();x.fillStyle=YEL;x.textAlign='center';x.textBaseline='middle';let fs=120;x.font=`${fs}px "${FONT}", Georgia, serif`;const w=x.measureText(tt).width;if(w>W*0.86){fs=fs*W*0.86/w;x.font=`${fs}px "${FONT}", Georgia, serif`}
@@ -192,25 +225,30 @@ if(mode==='cd')drawCd(t);else if(mode==='tx')drawTx(t,D);else drawEq(t);x.restor
 let start=performance.now(),recording=false,lastUrl=null,lastBlob=null,lastName='';
 function restart(){L=null;if(!recording)start=performance.now()}
 function frame(now){const D=dur(),el=(now-start)/1000,t=recording?Math.min(el,D-0.001):el%D;draw(t,now,D);requestAnimationFrame(frame)}
-$('rs').onclick=restart;
-const st=$('st'),v=$('v'),dlb=$('dlb'),shb=$('shb');
+$('rs').onclick=()=>{restart();if(mode==='eq'&&abuf)playFragment(dur())};
+const v=$('v'),dlb=$('dlb'),shb=$('shb');
 dlb.onclick=()=>{if(!lastUrl)return;const a=document.createElement('a');a.href=lastUrl;a.download=lastName;document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),1000)};
 shb.onclick=async()=>{if(!lastBlob)return;const file=new File([lastBlob],lastName,{type:lastBlob.type});try{await navigator.share({files:[file]})}catch(e){if(e.name!=='AbortError'){st.textContent='Меню «Поділитися» не відкрилось. Спробуй «Завантажити файл».'}}};
 $('rec').onclick=()=>{if(recording)return;
 if(!window.MediaRecorder||!c.captureStream){st.textContent='Цей браузер не вміє записувати відео. Онови iOS або спробуй Chrome.';return}
-const D=dur(),types=['video/mp4;codecs=avc1.42E01E','video/mp4','video/webm;codecs=vp9','video/webm'],mime=types.find(m=>MediaRecorder.isTypeSupported(m))||'';
-const ext=mime.includes('mp4')||!mime?'mp4':'webm',stream=c.captureStream(30);let rec;
+const D=dur(),withA=mode==='eq'&&!!abuf,addSound=withA&&eqau.checked;
+if(withA)ensureCtx();
+const vStream=c.captureStream(30);let stream=vStream;
+if(addSound)stream=new MediaStream([...vStream.getVideoTracks(),...dest.stream.getAudioTracks()]);
+const types=addSound?['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm']:['video/mp4;codecs=avc1.42E01E','video/mp4','video/webm;codecs=vp9','video/webm'];
+const mime=types.find(m=>MediaRecorder.isTypeSupported(m))||'',ext=mime.includes('mp4')||!mime?'mp4':'webm';let rec;
 try{rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:10000000}:{})}catch(e){st.textContent='Не вдалося почати запис.';return}
 const ch=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)ch.push(e.data)};
-rec.onstop=()=>{recording=false;start=performance.now();if(lastUrl)URL.revokeObjectURL(lastUrl);
+rec.onstop=()=>{recording=false;stopAudio();start=performance.now();if(lastUrl)URL.revokeObjectURL(lastUrl);
 lastBlob=new Blob(ch,{type:mime||'video/mp4'});lastUrl=URL.createObjectURL(lastBlob);
 if(mode==='cd')lastName='vidlik_'+nEl.value+'-'+(z0.checked?0:1)+'_9x16.'+ext;
 else if(mode==='tx'){const slug=(mainEl.value.trim().split(/\s+/).slice(0,3).join('_')||'tekst').replace(/[^\p{L}\p{N}_]/gu,'');lastName='futazh_'+slug+'_'+D+'s_9x16.'+ext}
-else lastName='ekvalaizer_'+eqs.value+'_'+D+'s_9x16.'+ext;
+else lastName='ekvalaizer_'+eqs.value+(addSound?'_zvuk':'')+'_'+D+'s_9x16.'+ext;
 v.src=lastUrl;v.classList.remove('hide');dlb.classList.remove('hide');
 const f=new File([lastBlob],lastName,{type:lastBlob.type});if(navigator.canShare&&navigator.canShare({files:[f]}))shb.classList.remove('hide');
 st.textContent='Готово ('+ext.toUpperCase()+', '+(lastBlob.size/1048576).toFixed(1)+' МБ). На iPhone натисни «Зберегти у Фото / поділитися» → «Зберегти відео».'};
-L=null;dlb.classList.add('hide');shb.classList.add('hide');recording=true;st.textContent='Записую… '+D+' с, не блокуй екран.';start=performance.now();rec.start(100);setTimeout(()=>rec.stop(),D*1000+300)};
+L=null;dlb.classList.add('hide');shb.classList.add('hide');recording=true;st.textContent='Записую… '+D+' с, не блокуй екран.';
+start=performance.now();rec.start(100);if(withA)playFragment(D);setTimeout(()=>rec.stop(),D*1000+300)};
 
 loadSettings();upd();setMode(mode);
 Promise.all(['Ruslan Display','Yeseva One','Kurale','Oranienbaum','Forum'].map(f=>document.fonts.load(`100px "${f}"`))).catch(()=>{}).finally(()=>{L=null;start=performance.now();requestAnimationFrame(frame)});
