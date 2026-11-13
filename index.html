@@ -12,33 +12,35 @@ body{margin:0;background:#141414;color:#e8e6df;font-family:-apple-system,system-
 .cv{flex:0 1 360px}
 canvas{width:100%;max-width:360px;height:auto;border-radius:12px;background:#2b2b2a;display:block;margin:0 auto}
 .p{flex:1 1 300px;max-width:420px;display:flex;flex-direction:column;gap:12px}
+.grp{display:flex;flex-direction:column;gap:12px}
 .r{display:flex;align-items:center;gap:10px}
 .l{font-size:14px;color:#a9a69d;min-width:100px}
 select,input[type=text],textarea{flex:1;min-width:0;background:#222;color:#eee;border:1px solid #444;border-radius:8px;padding:8px;font-size:16px;font-family:inherit}
 input[type=range]{flex:1}
 input[type=file]{flex:1;min-width:0;font-size:13px;color:#a9a69d}
-button{background:transparent;color:#eee;border:1px solid #555;border-radius:8px;padding:10px 14px;font-size:15px;font-family:inherit}
+button{background:transparent;color:#eee;border:1px solid #555;border-radius:8px;padding:10px 12px;font-size:15px;font-family:inherit}
 button.on{background:#e8e6df;color:#141414;border-color:#e8e6df}
 button.y{background:#F2E21B;color:#1b1b1b;border:0}
 .row{display:flex;gap:8px;flex-wrap:wrap}.row button{flex:1}
 .ck{font-size:14px;color:#a9a69d;display:flex;gap:16px;flex-wrap:wrap}
 #st{font-size:13px;color:#a9a69d;line-height:1.6;margin:0}
 .hide{display:none!important}
-.v{min-width:34px;font-size:14px;text-align:right}
+.v{min-width:44px;font-size:14px;text-align:right}
+.lnk{background:none;border:0;color:#a9a69d;font-size:13px;text-decoration:underline;padding:0;align-self:flex-start}
 </style>
 </head>
 <body>
 <div class="cv"><canvas id="c" width="1080" height="1920"></canvas></div>
 <div class="p">
-<div class="row"><button id="mCd" class="on">Відлік</button><button id="mTx">Текст</button></div>
+<div class="row"><button id="mCd" class="on">Відлік</button><button id="mTx">Текст</button><button id="mEq">Еквалайзер</button></div>
 
-<div id="gCd" style="display:flex;flex-direction:column;gap:12px">
+<div id="gCd" class="grp">
 <div class="r"><span class="l">Відлік від</span><input type="range" id="n" min="1" max="10" step="1" value="5"><span class="v" id="no">5</span></div>
 <div class="ck"><label><input type="checkbox" id="z0" checked> Показувати 0 в кінці</label></div>
 <div class="r"><span class="l">Товщина кола</span><input type="range" id="lw" min="4" max="24" step="1" value="11"><span class="v" id="lwo">11</span></div>
 </div>
 
-<div id="gTx" class="hide" style="flex-direction:column;gap:12px">
+<div id="gTx" class="grp hide">
 <div class="row"><button id="p1">Заставка 10 с</button><button id="p2">Слово 5 с</button></div>
 <div class="r"><span class="l">Верхній рядок</span><input type="text" id="top" placeholder="Слово:"></div>
 <div class="r" style="align-items:flex-start"><span class="l" style="padding-top:8px">Основний текст</span><textarea id="main" rows="3">Вгадай трек з Ребелії за одним словом</textarea></div>
@@ -46,122 +48,7 @@ button.y{background:#F2E21B;color:#1b1b1b;border:0}
 <div class="ck"><label><input type="checkbox" id="caps" checked> Великі літери</label><label><input type="checkbox" id="tim"> Лінія-таймер</label></div>
 </div>
 
-<div class="r"><span class="l">Шрифт</span><select id="ff"><option value="Ruslan Display">Ruslan Display</option><option value="Yeseva One">Yeseva One</option><option value="Kurale">Kurale</option><option value="Oranienbaum">Oranienbaum</option><option value="Forum">Forum</option></select></div>
-<div class="r"><span class="l">Свій шрифт</span><input type="file" id="up" accept=".ttf,.otf,.woff,.woff2"></div>
-<div class="r"><span class="l">Плівка</span><input type="range" id="k" min="0" max="100" step="1" value="70"><span class="v" id="ko">70%</span></div>
-
-<div class="row"><button id="rs">З початку</button><button id="rec" class="y">Записати відео</button></div>
-<p id="st">1080×1920, 30 кадрів/с. Під час запису не блокуй екран і не перемикай вкладку.</p>
-<div class="row"><button id="shb" class="y hide">Зберегти у Фото / поділитися</button><button id="dlb" class="hide">Завантажити файл</button></div>
-<video id="v" class="hide" controls playsinline muted style="width:180px;border-radius:8px"></video>
-</div>
-
-<script>
-const $=id=>document.getElementById(id);
-const c=$('c'),x=c.getContext('2d'),W=1080,H=1920;
-const YEL='#F2E21B',GOLD='#D6A843',GOLD2='#F5CD62',WH='rgba(236,234,226,0.9)';
-let FONT='Ruslan Display',mode='cd';
-function R(s){return function(){s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-function mk(w,h){const k=document.createElement('canvas');k.width=w;k.height=h;return k}
-
-const tex=mk(W+40,H+40),tx=tex.getContext('2d'),r0=R(42);
-tx.fillStyle='#2c2c2b';tx.fillRect(0,0,W+40,H+40);
-for(let i=0;i<70;i++){const px=r0()*W,py=r0()*H,rr=80+r0()*420,l=r0()<0.5;const g=tx.createRadialGradient(px,py,0,px,py,rr);g.addColorStop(0,l?'rgba(255,255,250,0.05)':'rgba(0,0,0,0.12)');g.addColorStop(1,'rgba(0,0,0,0)');tx.fillStyle=g;tx.fillRect(px-rr,py-rr,rr*2,rr*2)}
-for(let i=0;i<900;i++){const px=r0()*W,py=r0()*H,a=r0()*Math.PI,len=10+r0()*90;tx.strokeStyle=r0()<0.6?`rgba(255,255,245,${0.02+r0()*0.06})`:`rgba(0,0,0,${0.06+r0()*0.12})`;tx.lineWidth=0.6+r0()*1.6;tx.beginPath();tx.moveTo(px,py);tx.quadraticCurveTo(px+Math.cos(a)*len/2+(r0()-0.5)*10,py+Math.sin(a)*len/2,px+Math.cos(a)*len,py+Math.sin(a)*len);tx.stroke()}
-for(let i=0;i<6000;i++){tx.fillStyle=r0()<0.5?`rgba(255,255,255,${r0()*0.07})`:`rgba(0,0,0,${r0()*0.15})`;tx.fillRect(r0()*W,r0()*H,1+r0()*2.5,1+r0()*2.5)}
-const vg=tx.createRadialGradient(W/2+20,H/2+20,H*0.18,W/2+20,H/2+20,H*0.72);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,0.62)');tx.fillStyle=vg;tx.fillRect(0,0,W+40,H+40);
-const noise=[];for(let n=0;n<6;n++){const k=mk(360,640),kx=k.getContext('2d'),d=kx.createImageData(360,640),rn=R(100+n);for(let i=0;i<d.data.length;i+=4){const v=128+(rn()-0.5)*190;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255}kx.putImageData(d,0,0);noise.push(k)}
-
-function film(k,rf,fi){if(k<=0)return;x.globalCompositeOperation='overlay';x.globalAlpha=0.55*k;x.drawImage(noise[Math.floor(rf()*6)],0,0,W,H);x.globalCompositeOperation='source-over';x.globalAlpha=1;
-const b=Math.floor(fi/7),rb=R(b*31+3),ns=Math.floor(rb()*3.4*k);
-for(let j=0;j<ns;j++){let sx=rb()*W+(fi%7)*(rb()-0.5)*6;const lt=rb()<0.65;x.strokeStyle=lt?`rgba(235,232,220,${0.15+rb()*0.25})`:`rgba(0,0,0,${0.3+rb()*0.3})`;x.lineWidth=1+rb()*2.5;x.beginPath();x.moveTo(sx,0);for(let yy=0;yy<=H;yy+=160){sx+=(rf()-0.5)*3;x.lineTo(sx,yy)}x.stroke()}
-const nd=Math.floor(rf()*6*k);for(let j=0;j<nd;j++){const px=rf()*W,py=rf()*H,lt=rf()<0.4;x.fillStyle=lt?'rgba(240,238,228,0.55)':'rgba(0,0,0,0.7)';x.strokeStyle=x.fillStyle;
-if(rf()<0.7){x.beginPath();x.ellipse(px,py,2+rf()*6,2+rf()*5,rf()*3,0,Math.PI*2);x.fill()}else{x.lineWidth=1.5;x.beginPath();x.moveTo(px,py);x.bezierCurveTo(px+rf()*40-20,py+rf()*40,px+rf()*60-30,py+rf()*60,px+rf()*50-25,py+rf()*80);x.stroke()}}
-const f=(rf()-0.5)*0.16*k;x.fillStyle=f>0?`rgba(255,250,235,${f})`:`rgba(0,0,0,${-f*1.3})`;x.fillRect(0,0,W,H)}
-
-const eio=p=>p<0.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2,eo=p=>1-Math.pow(1-p,3),cl=p=>Math.max(0,Math.min(1,p));
-const nEl=$('n'),z0=$('z0'),lwEl=$('lw'),topEl=$('top'),mainEl=$('main'),durEl=$('dur'),capsEl=$('caps'),timEl=$('tim'),kEl=$('k'),ff=$('ff');
-function dur(){return mode==='cd'?(+nEl.value+(z0.checked?1:0)):+durEl.value}
-function upd(){$('no').textContent=nEl.value;$('lwo').textContent=lwEl.value;$('duro').textContent=durEl.value+' с';$('ko').textContent=kEl.value+'%'}
-[nEl,z0,lwEl,topEl,mainEl,durEl,capsEl,timEl,kEl].forEach(e=>e.addEventListener('input',()=>{upd();if(e!==kEl&&e!==lwEl)restart()}));
-function setMode(m){mode=m;$('mCd').classList.toggle('on',m==='cd');$('mTx').classList.toggle('on',m==='tx');
-$('gCd').classList.toggle('hide',m!=='cd');$('gTx').classList.toggle('hide',m!=='tx');$('gTx').style.display=m==='tx'?'flex':'';restart()}
-$('mCd').onclick=()=>setMode('cd');$('mTx').onclick=()=>setMode('tx');
-$('p1').onclick=()=>{topEl.value='';mainEl.value='Вгадай трек з Ребелії за одним словом';durEl.value=10;timEl.checked=false;upd();restart()};
-$('p2').onclick=()=>{topEl.value='Слово:';mainEl.value='Час';durEl.value=5;timEl.checked=true;upd();restart()};
-ff.onchange=()=>{const f=ff.value;document.fonts.load(`100px "${f}"`).catch(()=>{}).finally(()=>{FONT=f;restart()})};
-$('up').onchange=e=>{const fl=e.target.files[0];if(!fl)return;fl.arrayBuffer().then(b=>new FontFace('UserFont',b).load()).then(fc=>{document.fonts.add(fc);let o=ff.querySelector('option[value="UserFont"]');if(!o){o=document.createElement('option');o.value='UserFont';ff.appendChild(o)}o.textContent=fl.name;ff.value='UserFont';FONT='UserFont';restart()}).catch(()=>{$('st').textContent='Не вдалося відкрити цей файл шрифту. Спробуй .ttf або .otf.'})};
-
-function drawCd(t){
-const N=+nEl.value,i=Math.min(N,Math.floor(t)),d=String(N-i),p=Math.min(1,t-i),cx=W/2,cy=H/2-30,Rr=330,lw=+lwEl.value;
-x.strokeStyle='rgba(255,255,255,0.08)';x.lineWidth=Math.max(3,lw*0.5);x.beginPath();x.arc(cx,cy,Rr,0,Math.PI*2);x.stroke();
-const a=eio(Math.min(p/0.9,1)),s0=-Math.PI/2;x.lineCap='round';
-if(p<0.9){x.strokeStyle=GOLD;x.lineWidth=lw;x.beginPath();x.arc(cx,cy,Rr,s0,s0+Math.PI*2*a);x.stroke();
-const hx=cx+Math.cos(s0+Math.PI*2*a)*Rr,hy=cy+Math.sin(s0+Math.PI*2*a)*Rr;x.fillStyle=GOLD2;x.beginPath();x.arc(hx,hy,lw*0.85,0,Math.PI*2);x.fill()}
-else{const q=(p-0.9)/0.1;x.strokeStyle=GOLD2;x.lineWidth=lw*(1+0.5*(1-q));x.beginPath();x.arc(cx,cy,Rr,0,Math.PI*2);x.stroke();
-x.strokeStyle=`rgba(214,168,67,${0.5*(1-q)})`;x.lineWidth=Math.max(2,lw*0.4);x.beginPath();x.arc(cx,cy,Rr+14+70*eo(q),0,Math.PI*2);x.stroke()}
-const sc=1+0.1*(1-eo(Math.min(p/0.25,1))),al=Math.min(p/0.08,1);
-x.save();x.globalAlpha=al;x.translate(cx,cy);x.scale(sc,sc);x.font=`480px "${FONT}", Georgia, serif`;x.textAlign='center';x.textBaseline='alphabetic';
-const m=x.measureText(d),hh=m.actualBoundingBoxAscent+m.actualBoundingBoxDescent,fs=Math.min(1,380/Math.max(hh,1),440/Math.max(m.width,1));x.scale(fs,fs);
-x.fillStyle=YEL;x.fillText(d,0,(m.actualBoundingBoxAscent-m.actualBoundingBoxDescent)/2);x.restore();
-x.strokeStyle='rgba(235,235,230,0.55)';x.lineWidth=4;x.lineCap='butt';x.beginPath();x.moveTo(cx-80,cy+Rr+110);x.lineTo(cx+80,cy+Rr+110);x.stroke()}
-
-let L=null;
-function layout(){const caps=capsEl.checked;let txt=mainEl.value.trim();if(caps)txt=txt.toUpperCase();
-const paras=txt.split(/\n+/).map(s=>s.trim()).filter(Boolean);const nWords=paras.reduce((a,p)=>a+p.split(/\s+/).length,0);
-const maxW=W*0.84,maxH=820;let fs=nWords<=1?360:300,lines=[];
-for(;fs>=50;fs-=6){x.font=`${fs}px "${FONT}", Georgia, serif`;lines=[];let ok=true;
-for(const p of paras){let cur='';for(const w of p.split(/\s+/)){const tr=cur?cur+' '+w:w;if(x.measureText(tr).width<=maxW)cur=tr;else{if(cur)lines.push(cur);cur=w;if(x.measureText(w).width>maxW)ok=false}}if(cur)lines.push(cur)}
-if(ok&&lines.length*fs*1.12<=maxH)break}
-x.font=`${fs}px "${FONT}", Georgia, serif`;const lh=fs*1.12,cy=H/2-40,top0=cy-lines.length*lh/2,units=[],single=nWords===1;
-lines.forEach((ln,li)=>{const lw=x.measureText(ln).width,sx=W/2-lw/2,by=top0+li*lh+lh/2;
-if(single){for(let i=0;i<ln.length;i++)units.push({s:ln[i],x:sx+x.measureText(ln.slice(0,i)).width,y:by})}
-else{let off=0;for(const w of ln.split(' ')){units.push({s:w,x:sx+x.measureText(ln.slice(0,off)).width,y:by});off+=w.length+1}}});
-const stg=Math.min(single?0.14:0.2,1.8/Math.max(units.length,1));
-let tp=topEl.value.trim();if(caps)tp=tp.toUpperCase();
-L={fs,units,stg,top:top0,bot:top0+lines.length*lh,tp,single}}
-
-function drawTx(t,D){
-if(!L)layout();const {fs,units,stg,top,bot,tp,single}=L;
-if(tp){const p=eo(cl((t-0.15)/0.6));x.globalAlpha=p;x.fillStyle=WH;x.textAlign='center';x.textBaseline='middle';let tf=88;x.font=`${tf}px "${FONT}", Georgia, serif`;const tw=x.measureText(tp).width;if(tw>W*0.8){tf*=W*0.8/tw;x.font=`${tf}px "${FONT}", Georgia, serif`}
-x.fillText(tp,W/2,top-190+20*(1-p));x.globalAlpha=1}
-const dp=eo(cl((t-0.35)/0.7)),dy0=top-(tp?110:90);x.strokeStyle='rgba(236,234,226,0.6)';x.lineWidth=4;x.lineCap='butt';x.beginPath();x.moveTo(W/2-80*dp,dy0);x.lineTo(W/2+80*dp,dy0);x.stroke();
-x.font=`${fs}px "${FONT}", Georgia, serif`;x.textAlign='left';x.textBaseline='middle';x.fillStyle=YEL;
-const br=1+0.012*Math.sin(t*2.4);
-units.forEach((u,i)=>{const p=cl((t-0.6-i*stg)/0.45);if(p<=0)return;const e=eo(p);x.save();x.globalAlpha=p;
-const w=x.measureText(u.s).width;x.translate(u.x+w/2,u.y+(single?0:40*(1-e)));const s=(single?1+0.25*(1-e):1)*br;x.scale(s,s);x.fillText(u.s,-w/2,0);x.restore()});
-const gs=0.6+units.length*stg,gp=eo(cl((t-gs)/0.8)),gw=W*0.28*gp;
-if(gp>0){x.strokeStyle=GOLD;x.lineWidth=6;x.lineCap='round';x.beginPath();x.moveTo(W/2-gw,bot+70);x.lineTo(W/2+gw,bot+70);x.stroke();x.fillStyle=GOLD2;x.beginPath();x.arc(W/2,bot+70,9*gp,0,Math.PI*2);x.fill()}
-if(timEl.checked){const ty=H-380,tw=W*0.62,tl=W/2-tw/2,q=cl(t/D);x.lineCap='round';x.strokeStyle='rgba(255,255,255,0.1)';x.lineWidth=10;x.beginPath();x.moveTo(tl,ty);x.lineTo(tl+tw,ty);x.stroke();
-x.strokeStyle=GOLD;x.beginPath();x.moveTo(tl,ty);x.lineTo(tl+tw*q,ty);x.stroke();x.fillStyle=GOLD2;x.beginPath();x.arc(tl+tw*q,ty,13,0,Math.PI*2);x.fill()}}
-
-function draw(t,now,D){const k=kEl.value/100,fi=Math.floor(now/41.67),rf=R(fi*13+7),dx=(rf()-0.5)*5*k,dy=(rf()-0.5)*8*k;
-x.globalCompositeOperation='source-over';x.globalAlpha=1;x.save();x.translate(dx,dy);x.drawImage(tex,-20,-20);
-if(mode==='cd')drawCd(t);else drawTx(t,D);x.restore();film(k,rf,fi)}
-
-let start=performance.now(),recording=false,lastUrl=null,lastBlob=null,lastName='';
-function restart(){L=null;if(!recording)start=performance.now()}
-function frame(now){const D=dur(),el=(now-start)/1000,t=recording?Math.min(el,D-0.001):el%D;draw(t,now,D);requestAnimationFrame(frame)}
-$('rs').onclick=restart;
-const st=$('st'),v=$('v'),dlb=$('dlb'),shb=$('shb');
-dlb.onclick=()=>{if(!lastUrl)return;const a=document.createElement('a');a.href=lastUrl;a.download=lastName;document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),1000)};
-shb.onclick=async()=>{if(!lastBlob)return;const file=new File([lastBlob],lastName,{type:lastBlob.type});try{await navigator.share({files:[file]})}catch(e){if(e.name!=='AbortError'){st.textContent='Меню «Поділитися» не відкрилось. Спробуй «Завантажити файл».'}}};
-$('rec').onclick=()=>{if(recording)return;
-if(!window.MediaRecorder||!c.captureStream){st.textContent='Цей браузер не вміє записувати відео. Онови iOS або спробуй Chrome.';return}
-const D=dur(),types=['video/mp4;codecs=avc1.42E01E','video/mp4','video/webm;codecs=vp9','video/webm'],mime=types.find(m=>MediaRecorder.isTypeSupported(m))||'';
-const ext=mime.includes('mp4')||!mime?'mp4':'webm',stream=c.captureStream(30);let rec;
-try{rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:10000000}:{})}catch(e){st.textContent='Не вдалося почати запис.';return}
-const ch=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)ch.push(e.data)};
-rec.onstop=()=>{recording=false;start=performance.now();if(lastUrl)URL.revokeObjectURL(lastUrl);
-lastBlob=new Blob(ch,{type:mime||'video/mp4'});lastUrl=URL.createObjectURL(lastBlob);
-if(mode==='cd'){lastName='vidlik_'+nEl.value+'-'+(z0.checked?0:1)+'_9x16.'+ext}else{const slug=(mainEl.value.trim().split(/\s+/).slice(0,3).join('_')||'tekst').replace(/[^\p{L}\p{N}_]/gu,'');lastName='futazh_'+slug+'_'+D+'s_9x16.'+ext}
-v.src=lastUrl;v.classList.remove('hide');dlb.classList.remove('hide');
-const f=new File([lastBlob],lastName,{type:lastBlob.type});if(navigator.canShare&&navigator.canShare({files:[f]}))shb.classList.remove('hide');
-st.textContent='Готово ('+ext.toUpperCase()+', '+(lastBlob.size/1048576).toFixed(1)+' МБ). На iPhone натисни «Зберегти у Фото / поділитися» → «Зберегти відео».'};
-L=null;dlb.classList.add('hide');shb.classList.add('hide');recording=true;st.textContent='Записую… '+D+' с, не блокуй екран.';start=performance.now();rec.start(100);setTimeout(()=>rec.stop(),D*1000+300)};
-
-upd();
-Promise.all(['Ruslan Display','Yeseva One','Kurale','Oranienbaum','Forum'].map(f=>document.fonts.load(`100px "${f}"`))).catch(()=>{}).finally(()=>{L=null;start=performance.now();requestAnimationFrame(frame)});
-</script>
-</body>
-</html>
+<div id="gEq" class="grp hide">
+<div class="r"><span class="l">Стиль</span><select id="eqs"><option value="bars">Смуги еквалайзера</option><option value="wave">Хвиля осцилографа</option><option value="ring">Коло з променями</option></select></div>
+<div class="r"><span class="l">Підпис</span><input type="text" id="eqc" placeholder="Вгадай мелодію"></div>
+<div class="r"><span
